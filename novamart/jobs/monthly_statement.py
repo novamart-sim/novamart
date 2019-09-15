@@ -1,0 +1,48 @@
+"""Monthly finance statement: gross, fees, net for last month."""
+from zoneinfo import ZoneInfo
+
+import time
+
+from .. import db
+from ..constants import FEE_RATE, LOCAL_TZ
+from ..logutil import app_log, flush_all, job_log
+from .timeutil import local_month_window_utc, now
+
+
+def main():
+    t0 = time.time()
+    t = now()
+    ts = t.isoformat()
+    local = t.astimezone(ZoneInfo(LOCAL_TZ))
+    year, month = (local.year, local.month - 1) if local.month > 1 else (local.year - 1, 12)
+    start, end = local_month_window_utc(year, month)
+    label = f"{year:04d}-{month:02d}"
+
+    conn = db.job_connect()
+    cur = db.job_execute(conn, ts,
+        "SELECT COALESCE(SUM(price),0), COUNT(*) FROM orders "
+        "WHERE created_at >= %s AND created_at < %s AND status = 1", (start, end))
+    gross, n = cur.fetchone()
+    gross = float(gross)
+    fee = round(gross * FEE_RATE, 2)
+    net = round(gross - fee, 2)
+    db.job_execute(conn, ts,
+        "INSERT INTO statements(month, gross, fee, net, orders_count, created_at) "
+        "VALUES(%s,%s,%s,%s,%s,%s)", (label, gross, fee, net, n, ts))
+
+    cur = db.job_execute(conn, ts,
+        "SELECT COALESCE(SUM(p.fee),0) FROM payments p JOIN orders o ON o.id = p.order_id "
+        "WHERE o.created_at >= %s AND o.created_at < %s AND o.status = 1", (start, end))
+    collected = float(cur.fetchone()[0])
+    if abs(collected - fee) > 0.01:
+        app_log(ts, "WARNING", "statement_fee_mismatch", month=label,
+                statement_fee=fee, collected_fee=collected, delta=round(fee - collected, 2))
+    job_log(ts, "INFO", "monthly_statement", "statement_generated", month=label,
+            gross=gross, fee=fee, net=net, orders=n,
+            duration_ms=round((time.time() - t0) * 1000, 1))
+    conn.close()
+    flush_all()
+
+
+if __name__ == "__main__":
+    main()
