@@ -4,7 +4,7 @@
 FEE_RATE = 0.029
 
 # products hidden from the daily report (test/internal skus)
-EXCLUDED_SKUS = []
+EXCLUDED_SKUS = [1004856, 1002544]
 
 # brands hidden from the daily report
 BRAND_DENYLIST = []
@@ -23,3 +23,4 @@ REPORT_SCAN_CAP = 500
 
 # company timezone (reports and statements are business-local)
 LOCAL_TZ = "America/New_York"
+
