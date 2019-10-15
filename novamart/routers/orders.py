@@ -1,4 +1,6 @@
 """Order creation from payment-gateway callbacks."""
+from time import perf_counter
+
 from fastapi import APIRouter
 
 from .. import db
@@ -11,6 +13,7 @@ router = APIRouter()
 
 @router.post("/orders")
 async def create_order(body: dict):
+    started = perf_counter()
     ts = body["ts"]
     price = body["price"]
     fee = round(price * FEE_RATE, 2)
@@ -48,5 +51,6 @@ async def create_order(body: dict):
             created = True
     app_log(ts, "INFO", "order_created" if created else "order_callback_replayed",
             order_id=oid, user_id=body["uid"], product_id=body["pid"],
-            price=price, payment_ref=body["ref"], session=body["session"])
+            price=price, payment_ref=body["ref"], session=body["session"],
+            duration_ms=round((perf_counter() - started) * 1000, 1))
     return {"order_id": oid}
