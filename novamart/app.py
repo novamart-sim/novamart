@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from . import db, logutil
-from .routers import carts, catalog, orders, users
+from .routers import carts, catalog, orders, reports, users
 
 
 @asynccontextmanager
@@ -20,6 +20,7 @@ app.include_router(catalog.router)
 app.include_router(carts.router)
 app.include_router(orders.router)
 app.include_router(users.router)
+app.include_router(reports.router)
 
 
 @app.get("/health")
