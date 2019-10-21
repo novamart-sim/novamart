@@ -16,6 +16,8 @@ USER_INSERT = ("INSERT INTO users(id, email, name, region, signup_channel, devic
 PRODUCT_INSERT = ("INSERT INTO products(id, title, category, brand, vendor, list_price, "
                   "cost_price, stock, created_at) "
                   "VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s) ON CONFLICT DO NOTHING")
+PRODUCT_BRAND_REPAIR = ("UPDATE products SET brand = %s, title = %s "
+                        "WHERE id = %s AND COALESCE(brand, '') = '' AND %s <> ''")
 
 
 def _user_row(uid, ts):
@@ -28,6 +30,13 @@ def _product_row(pid, category, brand, price, ts):
     p = product_profile(pid, category, brand, price)
     return (pid, p["title"], category, brand, p["vendor"], price, p["cost_price"],
             p["stock"], ts)
+
+
+async def _repair_product_brand(conn, ts, pid, category, brand, price):
+    if not brand:
+        return
+    title = product_profile(pid, category, brand, price)["title"]
+    await db.execute(conn, ts, PRODUCT_BRAND_REPAIR, (brand, title, pid, brand))
 
 
 async def ensure_entities(conn, ts, uid, pid, price):
@@ -43,15 +52,15 @@ async def ensure_entities(conn, ts, uid, pid, price):
 @router.get("/products/{pid}")
 async def view_product(pid: int, uid: int, ts: str, session: str,
                        price: float = 0.0, category: str = "", brand: str = ""):
-    if uid not in _known_users or pid not in _known_products:
-        async with db.pool.connection() as conn:
-            if uid not in _known_users:
-                await db.execute(conn, ts, USER_INSERT, _user_row(uid, ts))
-                _known_users.add(uid)
-            if pid not in _known_products:
-                await db.execute(conn, ts, PRODUCT_INSERT,
-                                 _product_row(pid, category, brand, price, ts))
-                _known_products.add(pid)
+    async with db.pool.connection() as conn:
+        if uid not in _known_users:
+            await db.execute(conn, ts, USER_INSERT, _user_row(uid, ts))
+            _known_users.add(uid)
+        if pid not in _known_products:
+            await db.execute(conn, ts, PRODUCT_INSERT,
+                             _product_row(pid, category, brand, price, ts))
+            _known_products.add(pid)
+        await _repair_product_brand(conn, ts, pid, category, brand, price)
     app_log(ts, "INFO", "product_viewed", user_id=uid, product_id=pid, session=session)
     return {"ok": True}
 
@@ -66,5 +75,7 @@ async def price_feed(body: dict):
             await db.execute(conn, ts, PRODUCT_INSERT,
                              _product_row(it["product_id"], it.get("category", ""),
                                           it.get("brand", ""), it["list_price"], ts))
+            await _repair_product_brand(conn, ts, it["product_id"], it.get("category", ""),
+                                        it.get("brand", ""), it["list_price"])
     app_log(ts, "INFO", "price_feed_received", source=body.get("source", "unknown"), items=len(items))
     return {"accepted": len(items)}
