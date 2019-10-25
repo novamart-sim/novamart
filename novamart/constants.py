@@ -7,7 +7,7 @@ FEE_RATE = 0.029
 EXCLUDED_SKUS = [1004856, 1002544]
 
 # brands hidden from the daily report
-BRAND_DENYLIST = []
+BRAND_DENYLIST = ["lucente"]
 
 # order status for cancelled orders
 STATUS_CANCELLED = 4
@@ -23,5 +23,6 @@ REPORT_SCAN_CAP = 500
 
 # company timezone (reports and statements are business-local)
 LOCAL_TZ = "America/New_York"
+
 
 
