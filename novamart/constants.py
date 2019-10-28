@@ -10,7 +10,7 @@ EXCLUDED_SKUS = [1004856, 1002544]
 BRAND_DENYLIST = ["lucente"]
 
 # order status for cancelled orders
-STATUS_CANCELLED = 4
+STATUS_CANCELLED = 2
 
 # order statuses the daily report must skip
 EXCLUDED_STATUSES = [0]
@@ -23,6 +23,3 @@ REPORT_SCAN_CAP = 500
 
 # company timezone (reports and statements are business-local)
 LOCAL_TZ = "America/New_York"
-
-
-

@@ -1,10 +1,10 @@
 """Order creation from payment-gateway callbacks."""
 from time import perf_counter
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 
 from .. import db
-from ..constants import FEE_RATE
+from ..constants import FEE_RATE, STATUS_CANCELLED
 from ..logutil import app_log
 from .catalog import ensure_entities
 
@@ -33,7 +33,7 @@ async def create_order(body: dict):
                 await db.execute(conn, ts,
                     "INSERT INTO payments(order_id, gross, fee, net, created_at) VALUES(%s,%s,%s,%s,%s)",
                     (oid, price, fee, round(price - fee, 2), ts))
-            if status != 1:
+            if status == 0:
                 await db.execute(conn, ts,
                     "UPDATE orders SET status = 1, updated_at = %s WHERE id = %s", (ts, oid))
         else:
@@ -54,3 +54,23 @@ async def create_order(body: dict):
             price=price, payment_ref=body["ref"], session=body["session"],
             duration_ms=round((perf_counter() - started) * 1000, 1))
     return {"order_id": oid}
+
+
+@router.post("/orders/{order_id}/cancel")
+async def cancel_order(order_id: int, body: dict):
+    ts = body["ts"]
+    async with db.pool.connection() as conn:
+        cur = await db.execute(conn, ts,
+            "SELECT status FROM orders WHERE id = %s FOR UPDATE",
+            (order_id,))
+        row = await cur.fetchone()
+        if not row:
+            raise HTTPException(status_code=404, detail="order not found")
+        old_status = row[0]
+        if old_status != STATUS_CANCELLED:
+            await db.execute(conn, ts,
+                "UPDATE orders SET status = %s, updated_at = %s WHERE id = %s",
+                (STATUS_CANCELLED, ts, order_id))
+    app_log(ts, "INFO", "order_cancelled", order_id=order_id,
+            old_status=old_status, new_status=STATUS_CANCELLED)
+    return {"ok": True, "order_id": order_id, "status": STATUS_CANCELLED}
