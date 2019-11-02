@@ -24,19 +24,20 @@ def main():
         "WHERE created_at >= %s AND created_at < %s AND status = 1", (start, end))
     gross, n = cur.fetchone()
     gross = float(gross)
-    fee = round(gross * FEE_RATE, 2)
+
+    cur = db.job_execute(conn, ts,
+        "SELECT COALESCE(SUM(p.fee),0) FROM payments p JOIN orders o ON o.id = p.order_id "
+        "WHERE o.created_at >= %s AND o.created_at < %s AND o.status = 1", (start, end))
+    fee = float(cur.fetchone()[0])
+    expected_fee = round(gross * FEE_RATE, 2)
     net = round(gross - fee, 2)
     db.job_execute(conn, ts,
         "INSERT INTO statements(month, gross, fee, net, orders_count, created_at) "
         "VALUES(%s,%s,%s,%s,%s,%s)", (label, gross, fee, net, n, ts))
 
-    cur = db.job_execute(conn, ts,
-        "SELECT COALESCE(SUM(p.fee),0) FROM payments p JOIN orders o ON o.id = p.order_id "
-        "WHERE o.created_at >= %s AND o.created_at < %s AND o.status = 1", (start, end))
-    collected = float(cur.fetchone()[0])
-    if abs(collected - fee) > 0.01:
+    if abs(fee - expected_fee) > 0.01:
         app_log(ts, "WARNING", "statement_fee_mismatch", month=label,
-                statement_fee=fee, collected_fee=collected, delta=round(fee - collected, 2))
+                statement_fee=expected_fee, collected_fee=fee, delta=round(expected_fee - fee, 2))
     job_log(ts, "INFO", "monthly_statement", "statement_generated", month=label,
             gross=gross, fee=fee, net=net, orders=n,
             duration_ms=round((time.time() - t0) * 1000, 1))
