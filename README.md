@@ -28,3 +28,8 @@ Environment: `NOVAMART_DSN` (Postgres), `NOVAMART_LOG_DIR` (where app/db logs go
 
 - Prices come from the catalog feed; product rows are created on first sight.
 - Nightly `reconcile` flags anything odd in payments; check the logs if finance asks.
+
+
+## Trending
+
+Nightly job `novamart/jobs/trending.py`: ranks products by units over a **60-day window** (min 5 units to qualify), recency-decayed. Output: `analytics.trending_daily`.

@@ -5,3 +5,5 @@
 06:30  monthly  novamart.jobs.monthly_statement
 
 03:30  daily    novamart.jobs.affinity
+
+05:15  daily    novamart.jobs.trending
