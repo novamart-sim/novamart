@@ -8,3 +8,5 @@
 03:30  daily    novamart.jobs.affinity
 
 05:15  daily    novamart.jobs.trending
+
+06:20  daily    novamart.jobs.funnel
