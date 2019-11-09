@@ -16,6 +16,20 @@ USER_INSERT = ("INSERT INTO users(id, email, name, region, signup_channel, devic
 PRODUCT_INSERT = ("INSERT INTO products(id, title, category, brand, vendor, list_price, "
                   "cost_price, stock, created_at) "
                   "VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s) ON CONFLICT DO NOTHING")
+PRODUCT_UPSERT = ("INSERT INTO products(id, title, category, brand, vendor, list_price, "
+                  "cost_price, stock, created_at) "
+                  "VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s) "
+                  "ON CONFLICT (id) DO UPDATE SET "
+                  "title = CASE WHEN COALESCE(EXCLUDED.title, '') <> '' THEN EXCLUDED.title "
+                  "ELSE products.title END, "
+                  "category = CASE WHEN COALESCE(EXCLUDED.category, '') <> '' THEN EXCLUDED.category "
+                  "ELSE products.category END, "
+                  "brand = CASE WHEN COALESCE(EXCLUDED.brand, '') <> '' THEN EXCLUDED.brand "
+                  "ELSE products.brand END, "
+                  "vendor = CASE WHEN COALESCE(EXCLUDED.vendor, '') <> '' THEN EXCLUDED.vendor "
+                  "ELSE products.vendor END, "
+                  "list_price = EXCLUDED.list_price, cost_price = EXCLUDED.cost_price, "
+                  "stock = EXCLUDED.stock")
 PRODUCT_BRAND_REPAIR = ("UPDATE products SET brand = %s, title = %s "
                         "WHERE id = %s AND COALESCE(brand, '') = '' AND %s <> ''")
 
@@ -72,7 +86,7 @@ async def price_feed(body: dict):
     items = body.get("items", [])
     async with db.pool.connection() as conn:
         for it in items:
-            await db.execute(conn, ts, PRODUCT_INSERT,
+            await db.execute(conn, ts, PRODUCT_UPSERT,
                              _product_row(it["product_id"], it.get("category", ""),
                                           it.get("brand", ""), it["list_price"], ts))
             await _repair_product_brand(conn, ts, it["product_id"], it.get("category", ""),
