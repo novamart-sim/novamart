@@ -1,6 +1,6 @@
 # novamart job schedule (times are local)
 # format: HH:MM  daily|monthly  module
-02:00  daily    novamart.jobs.reconcile
+03:00  daily    novamart.jobs.reconcile
 06:00  daily    novamart.jobs.daily_report
 06:45  daily    novamart.jobs.top_sellers
 06:30  monthly  novamart.jobs.monthly_statement
@@ -10,3 +10,4 @@
 05:15  daily    novamart.jobs.trending
 
 06:20  daily    novamart.jobs.funnel
+
