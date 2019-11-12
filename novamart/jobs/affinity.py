@@ -1,6 +1,8 @@
 """Nightly product affinity: pairs carted together in the same session.
 
 score = pair count weighted by recency (exp decay), 30-day window.
+Pairs seen < MIN_PAIRS times get score -1: a sentinel for "not enough
+data to trust" — NOT a negative preference. Serving must filter < 0.
 Full recompute each night — simple beats clever at our size.
 """
 import math
@@ -11,7 +13,8 @@ from ..logutil import flush_all, job_log
 from .timeutil import now
 
 WINDOW_DAYS = 30
-DECAY = 0.05  # per-day recency decay
+DECAY = 0.05   # per-day recency decay
+MIN_PAIRS = 3  # graduation gate: below this, score is the -1 sentinel
 
 
 def main():
@@ -37,13 +40,16 @@ def main():
     rows = cur.fetchall()
     db.job_execute(conn, ts, "DELETE FROM analytics.product_affinity")
     for base, rec, pairs, last in rows:
-        age_days = max(0.0, (t - last).total_seconds() / 86400.0)
-        score = round(pairs * math.exp(-DECAY * age_days), 4)
+        if pairs < MIN_PAIRS:
+            score = -1
+        else:
+            age_days = max(0.0, (t - last).total_seconds() / 86400.0)
+            score = round(pairs * math.exp(-DECAY * age_days), 4)
         db.job_execute(conn, ts,
             "INSERT INTO analytics.product_affinity VALUES(%s,%s,%s,%s,%s)",
             (base, rec, score, pairs, ts))
     job_log(ts, "INFO", "affinity", "affinity_refresh", pairs=len(rows),
-            window_days=WINDOW_DAYS,
+            window_days=WINDOW_DAYS, min_pairs=MIN_PAIRS,
             duration_ms=round((time.time() - t0) * 1000, 1))
     conn.close()
     flush_all()
