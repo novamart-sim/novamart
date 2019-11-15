@@ -4,7 +4,7 @@ from time import perf_counter
 from fastapi import APIRouter, HTTPException
 
 from .. import db
-from ..constants import FEE_RATE, STATUS_CANCELLED
+from ..constants import FEE_RATE, STATUS_CANCELLED, STATUS_REFUNDED
 from ..logutil import app_log
 from .catalog import ensure_entities
 
@@ -67,6 +67,8 @@ async def cancel_order(order_id: int, body: dict):
         if not row:
             raise HTTPException(status_code=404, detail="order not found")
         old_status = row[0]
+        if old_status == STATUS_REFUNDED:
+            raise HTTPException(status_code=409, detail="refunded orders cannot be cancelled")
         if old_status != STATUS_CANCELLED:
             await db.execute(conn, ts,
                 "UPDATE orders SET status = %s, updated_at = %s WHERE id = %s",
@@ -74,3 +76,25 @@ async def cancel_order(order_id: int, body: dict):
     app_log(ts, "INFO", "order_cancelled", order_id=order_id,
             old_status=old_status, new_status=STATUS_CANCELLED)
     return {"ok": True, "order_id": order_id, "status": STATUS_CANCELLED}
+
+
+@router.post("/orders/{order_id}/refund")
+async def refund_order(order_id: int, body: dict):
+    ts = body["ts"]
+    async with db.pool.connection() as conn:
+        cur = await db.execute(conn, ts,
+            "SELECT status FROM orders WHERE id = %s FOR UPDATE",
+            (order_id,))
+        row = await cur.fetchone()
+        if not row:
+            raise HTTPException(status_code=404, detail="order not found")
+        old_status = row[0]
+        if old_status not in (1, STATUS_REFUNDED):
+            raise HTTPException(status_code=409, detail="only paid orders can be refunded")
+        if old_status != STATUS_REFUNDED:
+            await db.execute(conn, ts,
+                "UPDATE orders SET status = %s, updated_at = %s WHERE id = %s",
+                (STATUS_REFUNDED, ts, order_id))
+    app_log(ts, "INFO", "order_refunded", order_id=order_id,
+            old_status=old_status, new_status=STATUS_REFUNDED)
+    return {"ok": True, "order_id": order_id, "status": STATUS_REFUNDED}

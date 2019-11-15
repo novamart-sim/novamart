@@ -12,6 +12,9 @@ BRAND_DENYLIST = ["lucente"]
 # order status for cancelled orders
 STATUS_CANCELLED = 2
 
+# order status for refunded orders
+STATUS_REFUNDED = 3
+
 # order statuses the daily report must skip
 EXCLUDED_STATUSES = [0]
 
