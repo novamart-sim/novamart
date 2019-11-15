@@ -30,6 +30,8 @@ PRODUCT_UPSERT = ("INSERT INTO products(id, title, category, brand, vendor, list
                   "ELSE products.vendor END, "
                   "list_price = EXCLUDED.list_price, cost_price = EXCLUDED.cost_price, "
                   "stock = EXCLUDED.stock")
+PRICE_HISTORY_INSERT = ("INSERT INTO analytics.price_history(product_id, list_price, valid_from) "
+                        "VALUES(%s,%s,%s)")
 PRODUCT_BRAND_REPAIR = ("UPDATE products SET brand = %s, title = %s "
                         "WHERE id = %s AND COALESCE(brand, '') = '' AND %s <> ''")
 
@@ -86,6 +88,8 @@ async def price_feed(body: dict):
     items = body.get("items", [])
     async with db.pool.connection() as conn:
         for it in items:
+            await db.execute(conn, ts, PRICE_HISTORY_INSERT,
+                             (it["product_id"], it["list_price"], ts))
             await db.execute(conn, ts, PRODUCT_UPSERT,
                              _product_row(it["product_id"], it.get("category", ""),
                                           it.get("brand", ""), it["list_price"], ts))
