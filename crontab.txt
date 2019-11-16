@@ -11,3 +11,5 @@
 
 06:20  daily    novamart.jobs.funnel
 
+
+06:15  daily    novamart.jobs.kpi_daily
