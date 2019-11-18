@@ -16,7 +16,7 @@ STATUS_CANCELLED = 2
 STATUS_REFUNDED = 3
 
 # order statuses the daily report must skip
-EXCLUDED_STATUSES = [0]
+EXCLUDED_STATUSES = [0, 2, 3]
 
 # how many suspect refs reconcile flags per night
 RECONCILE_BATCH = 200
@@ -26,3 +26,4 @@ REPORT_SCAN_CAP = 500
 
 # company timezone (reports and statements are business-local)
 LOCAL_TZ = "America/New_York"
+
