@@ -5,7 +5,7 @@ from zoneinfo import ZoneInfo
 import time
 
 from .. import db
-from ..constants import BRAND_DENYLIST, EXCLUDED_SKUS, EXCLUDED_STATUSES, LOCAL_TZ, REPORT_SCAN_CAP
+from ..constants import BRAND_DENYLIST, EXCLUDED_SKUS, EXCLUDED_STATUSES, LOCAL_TZ
 from ..logutil import flush_all, job_log
 from .timeutil import local_day_window_utc, now
 
@@ -24,7 +24,7 @@ def main():
         "JOIN products p ON p.id = o.product_id "
         "WHERE o.created_at >= %s AND o.created_at < %s AND NOT (o.status = ANY(%s)) "
         "ORDER BY o.id", (start, end, EXCLUDED_STATUSES))
-    rows = cur.fetchmany(REPORT_SCAN_CAP)
+    rows = cur.fetchall()
 
     agg = {}
     for pid, price, brand in rows:
