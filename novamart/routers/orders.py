@@ -4,7 +4,7 @@ from time import perf_counter
 from fastapi import APIRouter, HTTPException
 
 from .. import db
-from ..constants import FEE_RATE, STATUS_CANCELLED, STATUS_REFUNDED
+from ..constants import FEE_FLAT, FEE_RATE, STATUS_CANCELLED, STATUS_REFUNDED
 from ..logutil import app_log
 from .catalog import ensure_entities
 
@@ -16,7 +16,7 @@ async def create_order(body: dict):
     started = perf_counter()
     ts = body["ts"]
     price = body["price"]
-    fee = round(price * FEE_RATE, 2)
+    fee = round(price * FEE_RATE + FEE_FLAT, 2)
     created = False
     async with db.pool.connection() as conn:
         await db.execute(conn, ts,

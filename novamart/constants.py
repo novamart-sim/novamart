@@ -27,3 +27,6 @@ REPORT_SCAN_CAP = 500
 # company timezone (reports and statements are business-local)
 LOCAL_TZ = "America/New_York"
 
+
+# flat per-transaction processor fee (added Nov 2019 fee change)
+FEE_FLAT = 0.30
