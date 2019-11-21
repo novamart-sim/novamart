@@ -30,3 +30,6 @@ LOCAL_TZ = "America/New_York"
 
 # flat per-transaction processor fee (added Nov 2019 fee change)
 FEE_FLAT = 0.30
+
+# max promo discount fraction (finance-approved)
+DISCOUNT_CAP = 0.25
