@@ -15,3 +15,5 @@
 06:15  daily    novamart.jobs.kpi_daily
 
 04:45  daily    novamart.jobs.price_suggest
+
+06:50  daily    novamart.jobs.reorder_forecast

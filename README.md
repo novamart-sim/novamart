@@ -33,3 +33,7 @@ Environment: `NOVAMART_DSN` (Postgres), `NOVAMART_LOG_DIR` (where app/db logs go
 ## Trending
 
 Nightly job `novamart/jobs/trending.py`: ranks products by units over a **60-day window** (min 5 units to qualify), recency-decayed. Output: `analytics.trending_daily`.
+
+## Reorder hints
+
+`analytics.reorder_hints` is an ADVISORY heuristic (hand-fit constants). Do not use it for finance or commitments unless specifically told to.
