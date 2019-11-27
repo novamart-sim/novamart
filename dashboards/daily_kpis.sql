@@ -5,5 +5,6 @@ SELECT o.created_at::date AS day,
        COUNT(DISTINCT o.user_id) AS active_customers
 FROM orders o
 WHERE o.created_at >= now() - interval '14 days'
+  AND o.user_id <> 424242
 GROUP BY 1
 ORDER BY 1 DESC;

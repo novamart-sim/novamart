@@ -19,10 +19,15 @@ def main():
     job_log(ts, "INFO", "daily_report", "job_started", report_date=str(report_day))
 
     conn = db.job_connect()
+    db.job_execute(conn, ts, "CREATE SCHEMA IF NOT EXISTS analytics")
+    db.job_execute(conn, ts,
+        "CREATE TABLE IF NOT EXISTS analytics.test_users (user_id BIGINT PRIMARY KEY)")
     cur = db.job_execute(conn, ts,
         "SELECT o.product_id, o.price, p.brand FROM orders o "
         "JOIN products p ON p.id = o.product_id "
+        "LEFT JOIN analytics.test_users tu ON tu.user_id = o.user_id "
         "WHERE o.created_at >= %s AND o.created_at < %s AND NOT (o.status = ANY(%s)) "
+        "AND tu.user_id IS NULL "
         "ORDER BY o.id", (start, end, EXCLUDED_STATUSES))
     rows = cur.fetchall()
 
