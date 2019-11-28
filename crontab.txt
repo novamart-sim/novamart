@@ -17,3 +17,5 @@
 04:45  daily    novamart.jobs.price_suggest
 
 06:50  daily    novamart.jobs.reorder_forecast
+
+07:15  daily    novamart.jobs.email_digest
