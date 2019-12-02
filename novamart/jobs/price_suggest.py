@@ -43,3 +43,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+# NOTE(dec 2): Phase 2 (serving) ON HOLD per exec/legal review. Shadow job keeps running.
