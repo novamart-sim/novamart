@@ -1,12 +1,16 @@
 """Monthly finance statement: gross, fees, net for last month."""
+from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
 
 import time
 
 from .. import db
-from ..constants import FEE_RATE, LOCAL_TZ
+from ..constants import FEE_FLAT, FEE_RATE, LOCAL_TZ
 from ..logutil import app_log, flush_all, job_log
 from .timeutil import local_month_window_utc, now
+
+
+FEE_CHANGE_AT = datetime(2019, 11, 20, tzinfo=ZoneInfo(LOCAL_TZ)).astimezone(timezone.utc)
 
 
 def main():
@@ -29,7 +33,13 @@ def main():
         "SELECT COALESCE(SUM(p.fee),0) FROM payments p JOIN orders o ON o.id = p.order_id "
         "WHERE o.created_at >= %s AND o.created_at < %s AND o.status = 1", (start, end))
     fee = float(cur.fetchone()[0])
-    expected_fee = round(gross * FEE_RATE, 2)
+    cur = db.job_execute(conn, ts,
+        "SELECT COALESCE(SUM(CASE "
+        "WHEN created_at < %s THEN ROUND((price * %s)::numeric, 2) "
+        "ELSE ROUND((price * %s + %s)::numeric, 2) END),0) FROM orders "
+        "WHERE created_at >= %s AND created_at < %s AND status = 1",
+        (FEE_CHANGE_AT, FEE_RATE, FEE_RATE, FEE_FLAT, start, end))
+    expected_fee = float(cur.fetchone()[0])
     net = round(gross - fee, 2)
     db.job_execute(conn, ts,
         "INSERT INTO statements(month, gross, fee, net, orders_count, created_at) "
