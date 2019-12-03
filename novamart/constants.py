@@ -33,3 +33,6 @@ FEE_FLAT = 0.30
 
 # max promo discount fraction (finance-approved)
 DISCOUNT_CAP = 0.25
+
+# fraud auto-hold: orders scoring above this go to status 6 (held)
+FRAUD_HOLD_THRESHOLD = 0.90
