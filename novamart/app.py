@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from . import db, logutil
-from .routers import accounts, carts, catalog, orders, similar
+from .routers import carts, catalog, orders, payments_webhook, similar
 
 
 @asynccontextmanager
@@ -16,11 +16,11 @@ async def lifespan(app):
 
 
 app = FastAPI(title="novamart", lifespan=lifespan)
-app.include_router(accounts.router)
 app.include_router(catalog.router)
 app.include_router(carts.router)
 app.include_router(orders.router)
 app.include_router(similar.router)
+app.include_router(payments_webhook.router)
 
 
 @app.get("/health")
