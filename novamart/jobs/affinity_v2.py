@@ -1,6 +1,6 @@
 """Product affinity v2: conversion-weighted (did co-carted pairs convert?).
 
-Writes analytics.product_affinity_v2, rows stamped model_version 2.0.0.
+Writes analytics.product_affinity_v2, rows stamped model_version 2.0.1.
 Outcome weights: carted together = 1, converted to an order = 3.
 """
 import math
@@ -13,7 +13,7 @@ from .timeutil import now
 WINDOW_DAYS = 30
 DECAY = 0.05
 MIN_PAIRS = 3
-MODEL_VERSION = "2.0.0"
+MODEL_VERSION = "2.0.1"
 W_CART, W_ORDER = 1.0, 3.0
 # monthly demand normalization, Jan..Nov (from the 2019 planning sheet)
 SEASONAL_FACTORS = [1.00, 0.98, 1.01, 1.02, 1.00, 0.97, 0.96, 0.99, 1.03, 1.05, 1.12]
@@ -23,7 +23,7 @@ def main():
     t0 = time.time()
     t = now()
     ts = t.isoformat()
-    season = SEASONAL_FACTORS[t.month - 1]
+    season = SEASONAL_FACTORS[t.month - 1] if t.month <= len(SEASONAL_FACTORS) else 1.0
     conn = db.job_connect()
     db.job_execute(conn, ts,
         "CREATE TABLE IF NOT EXISTS analytics.product_affinity_v2 ("
