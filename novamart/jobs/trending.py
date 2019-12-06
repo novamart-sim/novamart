@@ -6,7 +6,7 @@ from .. import db
 from ..logutil import flush_all, job_log
 from .timeutil import now
 
-WINDOW_DAYS = 60
+WINDOW_DAYS = 30
 MIN_UNITS = 5     # qualification gate
 DECAY = 0.05
 TOP_N = 50
