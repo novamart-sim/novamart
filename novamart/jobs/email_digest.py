@@ -1,6 +1,6 @@
 """Marketing email digest: top products to contactable customers.
 
-Gated by the DIGEST_ON env flag (set in deploy/cron.env).
+Gated by the ENABLE_DIGEST env flag (set in deploy/cron.env).
 """
 import os
 import time
@@ -11,7 +11,8 @@ from .timeutil import now
 
 
 def enabled() -> bool:
-    return os.environ.get("DIGEST_ON", "0") == "1"
+    return os.environ.get("ENABLE_DIGEST",
+        os.environ.get("DIGEST_ON", "0")) == "1"
 
 
 def main():
