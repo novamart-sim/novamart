@@ -37,3 +37,7 @@ Nightly job `novamart/jobs/trending.py`: ranks products by units over a **60-day
 ## Reorder hints
 
 `analytics.reorder_hints` is an ADVISORY heuristic (hand-fit constants). Do not use it for finance or commitments unless specifically told to.
+
+## Rec model v4
+
+`novamart/jobs/model_train.py` trains the learned similar-products model nightly (random-arm data). Features: served-list size, base price, base popularity, account age, signup channel, marketing opt-in, user region affinity, device mix, and stock level. Serving is version `4.0.0` behind `REC_MODEL_VERSION` in deploy/flags.env.

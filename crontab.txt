@@ -25,3 +25,5 @@
 05:45  daily    novamart.jobs.fraud_score
 12:00  daily    novamart.jobs.intraday_report
 17:00  daily    novamart.jobs.intraday_report
+
+04:15  daily    novamart.jobs.model_train
