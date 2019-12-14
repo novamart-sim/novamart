@@ -6,7 +6,7 @@ from .. import db
 from ..logutil import flush_all, job_log
 from .timeutil import now
 
-GAP_MIN = 30  # inactivity gap that splits a session
+GAP_MIN = 120  # inactivity gap that splits a session
 
 
 def main():
