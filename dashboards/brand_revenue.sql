@@ -19,5 +19,6 @@ FROM item_orders io
 JOIN products p ON p.id = io.product_id
 WHERE io.created_at >= now() - interval '30 days'
   AND io.user_id <> 424242
+  AND p.brand NOT IN ('lucente', 'jetem')
 GROUP BY p.brand
 ORDER BY revenue DESC;

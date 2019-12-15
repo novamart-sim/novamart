@@ -7,6 +7,7 @@ report_days AS (
          SUM(r.units) AS orders,
          SUM(r.revenue) AS revenue
   FROM report_rows r
+  JOIN products p ON p.id = r.product_id
   JOIN (
     SELECT rr.report_date, MAX(rr.created_at) AS created_at
     FROM report_rows rr
@@ -15,6 +16,7 @@ report_days AS (
       AND rr.report_date < b.today
     GROUP BY 1
   ) latest ON latest.report_date = r.report_date AND latest.created_at = r.created_at
+  WHERE p.brand NOT IN ('lucente', 'jetem')
   GROUP BY 1
 
   UNION ALL
@@ -23,6 +25,7 @@ report_days AS (
          SUM(r.units) AS orders,
          SUM(r.revenue) AS revenue
   FROM report_rows_intraday r
+  JOIN products p ON p.id = r.product_id
   JOIN (
     SELECT rr.report_date, MAX(rr.created_at) AS created_at
     FROM report_rows_intraday rr
@@ -30,6 +33,7 @@ report_days AS (
     WHERE rr.report_date = b.today
     GROUP BY 1
   ) latest ON latest.report_date = r.report_date AND latest.created_at = r.created_at
+  WHERE p.brand NOT IN ('lucente', 'jetem')
   GROUP BY 1
 ),
 customer_days AS (
@@ -37,10 +41,12 @@ customer_days AS (
          COUNT(DISTINCT o.user_id) AS active_customers,
          COUNT(DISTINCT cu.user_id) AS contactable_customers
   FROM orders o
+  JOIN products p ON p.id = o.product_id
   LEFT JOIN analytics.contactable_users cu ON cu.user_id = o.user_id
   CROSS JOIN bounds b
   WHERE o.created_at >= ((b.today - 13)::timestamp AT TIME ZONE 'America/New_York')
     AND o.user_id <> 424242
+    AND p.brand NOT IN ('lucente', 'jetem')
   GROUP BY 1
 )
 SELECT rd.day,

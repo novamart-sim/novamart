@@ -7,7 +7,7 @@ FEE_RATE = 0.029
 EXCLUDED_SKUS = [1004856, 1002544]
 
 # brands hidden from the daily report
-BRAND_DENYLIST = ["lucente"]
+BRAND_DENYLIST = ["lucente", "jetem"]
 
 # order status for cancelled orders
 STATUS_CANCELLED = 2

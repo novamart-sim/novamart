@@ -38,5 +38,6 @@ LEFT JOIN LATERAL (
 ) cn ON true
 WHERE io.created_at >= now() - interval '30 days'
   AND io.user_id <> 424242
+  AND p.brand NOT IN ('lucente', 'jetem')
 GROUP BY 1
 ORDER BY revenue DESC;

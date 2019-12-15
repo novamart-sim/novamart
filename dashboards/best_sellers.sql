@@ -16,8 +16,10 @@ WITH item_orders AS (
 )
 SELECT io.product_id, COUNT(*) AS units, SUM(io.price) AS revenue
 FROM item_orders io
+JOIN products p ON p.id = io.product_id
 WHERE io.created_at >= now() - interval '7 days'
   AND io.user_id <> 424242
+  AND p.brand NOT IN ('lucente', 'jetem')
 GROUP BY io.product_id
 ORDER BY revenue DESC
 LIMIT 20;
