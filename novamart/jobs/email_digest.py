@@ -10,9 +10,25 @@ from ..logutil import flush_all, job_log
 from .timeutil import now
 
 
+def cron_env_flag(name: str):
+    try:
+        with open("deploy/cron.env") as f:
+            for line in f:
+                line = line.strip()
+                if not line or line.startswith("#") or "=" not in line:
+                    continue
+                key, value = line.split("=", 1)
+                if key == name:
+                    return value
+    except OSError:
+        return None
+    return None
+
+
 def enabled() -> bool:
     return os.environ.get("ENABLE_DIGEST",
-        os.environ.get("DIGEST_ON", "0")) == "1"
+        os.environ.get("DIGEST_ON",
+        cron_env_flag("ENABLE_DIGEST") or "0")) == "1"
 
 
 def main():
