@@ -50,7 +50,6 @@ async def similar(pid: int, uid: int, ts: str, session: str):
     intended = intended_version()
     effective, source, reason, arm = intended, "model", None, "none"
     async with db.pool.connection() as conn:
-        items = []
         if in_random_arm(uid):
             arm, source = "random", "random_arm"
             cur = await db.execute(conn, ts,
@@ -61,29 +60,32 @@ async def similar(pid: int, uid: int, ts: str, session: str):
             rng = random.Random(f"{uid}:{session}:{pid}")
             rng.shuffle(pool)
             items = pool[:K]
-        else:
-            table = ("analytics.product_affinity_v2" if effective == "2.0.0"
-                     else "analytics.model_scores")
-            try:
-                cur = await db.execute(conn, ts,
-                    f"SELECT rec_pid FROM {table} "
-                    "WHERE base_pid = %s AND score >= 0 "
-                    "ORDER BY score DESC LIMIT %s", (pid, K))
-                rows = await cur.fetchall()
-                items = [int(r[0]) for r in rows
-                         if int(r[0]) not in EXCLUDED_SKUS]
-            except Exception:
-                items = []
-                reason = "table_missing"
-            if not items:
-                effective, source = "fallback", "fallback"
-                reason = reason or "no_scores"
-                cur = await db.execute(conn, ts,
-                    "SELECT product_id FROM analytics.trending_daily "
-                    "WHERE day = (SELECT MAX(day) FROM analytics.trending_daily) "
-                    "ORDER BY rank LIMIT %s", (K,))
-                rows = await cur.fetchall()
-                items = [int(r[0]) for r in rows]
+            app_log(ts, "INFO", "rec_served", user_id=uid, product_id=pid,
+                    session=session, n_items=len(items), rec_source=source, arm=arm)
+            return {"items": items, "source": source, "version": effective}
+        items = []
+        table = ("analytics.product_affinity_v2" if effective == "2.0.0"
+                 else "analytics.model_scores")
+        try:
+            cur = await db.execute(conn, ts,
+                f"SELECT rec_pid FROM {table} "
+                "WHERE base_pid = %s AND score >= 0 "
+                "ORDER BY score DESC LIMIT %s", (pid, K))
+            rows = await cur.fetchall()
+            items = [int(r[0]) for r in rows
+                     if int(r[0]) not in EXCLUDED_SKUS]
+        except Exception:
+            items = []
+            reason = "table_missing"
+        if not items:
+            effective, source = "fallback", "fallback"
+            reason = reason or "no_scores"
+            cur = await db.execute(conn, ts,
+                "SELECT product_id FROM analytics.trending_daily "
+                "WHERE day = (SELECT MAX(day) FROM analytics.trending_daily) "
+                "ORDER BY rank LIMIT %s", (K,))
+            rows = await cur.fetchall()
+            items = [int(r[0]) for r in rows]
         await db.execute(conn, ts,
             "INSERT INTO analytics.rec_decision_log "
             "VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s)",
