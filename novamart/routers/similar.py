@@ -2,14 +2,16 @@
 
 Versions: 1.0.0 retired (enum kept for old log rows), 2.0.0 = affinity
 v2 exploit (default), 4.0.0 = trained model scores (behind flag).
-Model version comes from deploy/flags.env (REC_MODEL_VERSION);
-flipping it is a redeploy, not a code change. 5% of users
-(hash(uid) % 20 == 0) get the uniform-random arm: unbiased training
-data for the learned model.
+Model version comes from deploy/flags.env (REC_MODEL_VERSION).
+5% of users get the uniform-random arm (unbiased training data).
+Score lookups are cached in-process for CACHE_TTL_S seconds — the
+affinity job refreshes nightly at 03:45, so cached entries can serve
+yesterday's scores until the TTL expires.
 """
 import hashlib
 import os
 import random
+import time as _time
 
 from fastapi import APIRouter
 
@@ -20,6 +22,8 @@ from ..logutil import app_log
 router = APIRouter()
 
 K = 5
+CACHE_TTL_S = 6 * 3600
+_score_cache: dict = {}
 REC_VERSIONS = {
     "1.0.0": "retired initial co-cart model (kept for old log rows)",
     "2.0.0": "affinity v2 exploit",
@@ -60,23 +64,34 @@ async def similar(pid: int, uid: int, ts: str, session: str):
             rng = random.Random(f"{uid}:{session}:{pid}")
             rng.shuffle(pool)
             items = pool[:K]
+            await db.execute(conn, ts,
+                "INSERT INTO analytics.rec_decision_log "
+                "VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s)",
+                (ts, uid, pid, ",".join(map(str, items)), intended,
+                 effective, source, reason, arm))
             app_log(ts, "INFO", "rec_served", user_id=uid, product_id=pid,
                     session=session, n_items=len(items), rec_source=source, arm=arm)
             return {"items": items, "source": source, "version": effective}
         items = []
-        table = ("analytics.product_affinity_v2" if effective == "2.0.0"
-                 else "analytics.model_scores")
-        try:
-            cur = await db.execute(conn, ts,
-                f"SELECT rec_pid FROM {table} "
-                "WHERE base_pid = %s AND score >= 0 "
-                "ORDER BY score DESC LIMIT %s", (pid, K))
-            rows = await cur.fetchall()
-            items = [int(r[0]) for r in rows
-                     if int(r[0]) not in EXCLUDED_SKUS]
-        except Exception:
-            items = []
-            reason = "table_missing"
+        cached = _score_cache.get(pid)
+        if cached and _time.monotonic() - cached[0] < CACHE_TTL_S:
+            items = [i for i in cached[1] if i not in EXCLUDED_SKUS]
+            reason = "cache"
+        else:
+            table = ("analytics.product_affinity_v2" if effective == "2.0.0"
+                     else "analytics.model_scores")
+            try:
+                cur = await db.execute(conn, ts,
+                    f"SELECT rec_pid FROM {table} "
+                    "WHERE base_pid = %s AND score >= 0 "
+                    "ORDER BY score DESC LIMIT %s", (pid, K))
+                rows = await cur.fetchall()
+                items = [int(r[0]) for r in rows
+                         if int(r[0]) not in EXCLUDED_SKUS]
+                _score_cache[pid] = (_time.monotonic(), items)
+            except Exception:
+                items = []
+                reason = "table_missing"
         if not items:
             effective, source = "fallback", "fallback"
             reason = reason or "no_scores"
