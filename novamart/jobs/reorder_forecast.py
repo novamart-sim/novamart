@@ -10,7 +10,7 @@ from ..logutil import flush_all, job_log
 from .timeutil import now
 
 BASE = 15.6
-K = 141.12
+K = 162.4
 C = 1.8
 
 
