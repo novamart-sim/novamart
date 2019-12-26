@@ -4,9 +4,9 @@ Versions: 1.0.0 retired (enum kept for old log rows), 2.0.0 = affinity
 v2 exploit (default), 4.0.0 = trained model scores (behind flag).
 Model version comes from deploy/flags.env (REC_MODEL_VERSION).
 5% of users get the uniform-random arm (unbiased training data).
-Score lookups are cached in-process for CACHE_TTL_S seconds — the
-affinity job refreshes nightly at 03:45, so cached entries can serve
-yesterday's scores until the TTL expires.
+Score lookups are cached in-process for CACHE_TTL_S seconds, but the
+cache is invalidated as soon as the backing score table refreshes so
+fresh nightly affinity scores are visible right away.
 """
 import hashlib
 import os
@@ -24,6 +24,7 @@ router = APIRouter()
 K = 5
 CACHE_TTL_S = 6 * 3600
 _score_cache: dict = {}
+_cache_epoch: dict = {}
 REC_VERSIONS = {
     "1.0.0": "retired initial co-cart model (kept for old log rows)",
     "2.0.0": "affinity v2 exploit",
@@ -47,6 +48,21 @@ def intended_version():
 def in_random_arm(uid: int) -> bool:
     h = hashlib.sha256(str(uid).encode()).hexdigest()
     return int(h[:8], 16) % 20 == 0
+
+
+async def _refresh_cache_epoch(conn, ts: str, table: str):
+    try:
+        cur = await db.execute(conn, ts,
+            f"SELECT MAX(updated_at) FROM {table}")
+        row = await cur.fetchone()
+        latest = row[0] if row else None
+        if latest and _cache_epoch.get(table) != latest:
+            stale = [k for k in _score_cache if k[0] == table]
+            for key in stale:
+                _score_cache.pop(key, None)
+            _cache_epoch[table] = latest
+    except Exception:
+        pass
 
 
 @router.get("/products/{pid}/similar")
@@ -73,22 +89,26 @@ async def similar(pid: int, uid: int, ts: str, session: str):
                     session=session, n_items=len(items), rec_source=source, arm=arm)
             return {"items": items, "source": source, "version": effective}
         items = []
-        cached = _score_cache.get(pid)
+        table = ("analytics.product_affinity_v2" if effective == "2.0.0"
+                 else "analytics.model_scores")
+        await _refresh_cache_epoch(conn, ts, table)
+        cache_key = (table, pid)
+        cached = _score_cache.get(cache_key)
         if cached and _time.monotonic() - cached[0] < CACHE_TTL_S:
             items = [i for i in cached[1] if i not in EXCLUDED_SKUS]
             reason = "cache"
         else:
-            table = ("analytics.product_affinity_v2" if effective == "2.0.0"
-                     else "analytics.model_scores")
             try:
                 cur = await db.execute(conn, ts,
                     f"SELECT rec_pid FROM {table} "
                     "WHERE base_pid = %s AND score >= 0 "
+                    f"AND updated_at = (SELECT MAX(updated_at) FROM {table}) "
                     "ORDER BY score DESC LIMIT %s", (pid, K))
                 rows = await cur.fetchall()
                 items = [int(r[0]) for r in rows
                          if int(r[0]) not in EXCLUDED_SKUS]
-                _score_cache[pid] = (_time.monotonic(), items)
+                if items:
+                    _score_cache[cache_key] = (_time.monotonic(), items)
             except Exception:
                 items = []
                 reason = "table_missing"
