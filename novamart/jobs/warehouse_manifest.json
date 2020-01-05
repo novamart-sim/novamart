@@ -1,0 +1,954 @@
+{
+ "bq_types": {
+  "analytics.blank_brand_products": [
+   "INT64",
+   "STRING",
+   "STRING",
+   "STRING",
+   "STRING",
+   "INT64",
+   "NUMERIC",
+   "TIMESTAMP",
+   "TIMESTAMP",
+   "STRING",
+   "TIMESTAMP"
+  ],
+  "analytics.category_name_history": [
+   "STRING",
+   "STRING",
+   "DATE"
+  ],
+  "analytics.category_names": [
+   "STRING",
+   "STRING",
+   "DATE"
+  ],
+  "analytics.chargebacks": [
+   "INT64",
+   "NUMERIC",
+   "TIMESTAMP"
+  ],
+  "analytics.daily_funnel": [
+   "DATE",
+   "INT64",
+   "INT64",
+   "TIMESTAMP"
+  ],
+  "analytics.digest_log": [
+   "TIMESTAMP",
+   "INT64",
+   "INT64"
+  ],
+  "analytics.kpi_daily": [
+   "DATE",
+   "INT64",
+   "TIMESTAMP"
+  ],
+  "analytics.model_registry": [
+   "STRING",
+   "TIMESTAMP",
+   "STRING",
+   "INT64"
+  ],
+  "analytics.model_scores": [
+   "INT64",
+   "INT64",
+   "NUMERIC",
+   "TIMESTAMP"
+  ],
+  "analytics.order_risk": [
+   "INT64",
+   "NUMERIC",
+   "NUMERIC",
+   "BOOL",
+   "BOOL",
+   "TIMESTAMP"
+  ],
+  "analytics.price_history": [
+   "INT64",
+   "NUMERIC",
+   "TIMESTAMP"
+  ],
+  "analytics.price_suggestions": [
+   "INT64",
+   "NUMERIC",
+   "NUMERIC",
+   "INT64",
+   "TIMESTAMP"
+  ],
+  "analytics.product_affinity": [
+   "INT64",
+   "INT64",
+   "NUMERIC",
+   "INT64",
+   "TIMESTAMP"
+  ],
+  "analytics.product_affinity_v2": [
+   "INT64",
+   "INT64",
+   "NUMERIC",
+   "INT64",
+   "STRING",
+   "TIMESTAMP"
+  ],
+  "analytics.rec_decision_log": [
+   "TIMESTAMP",
+   "INT64",
+   "INT64",
+   "STRING",
+   "STRING",
+   "STRING",
+   "STRING",
+   "STRING",
+   "STRING"
+  ],
+  "analytics.reorder_hints": [
+   "INT64",
+   "NUMERIC",
+   "INT64",
+   "TIMESTAMP"
+  ],
+  "analytics.statement_corrections": [
+   "STRING",
+   "NUMERIC",
+   "STRING"
+  ],
+  "analytics.statement_overrides": [
+   "STRING",
+   "NUMERIC",
+   "NUMERIC",
+   "NUMERIC",
+   "INT64",
+   "TIMESTAMP",
+   "STRING"
+  ],
+  "analytics.test_users": [
+   "INT64"
+  ],
+  "analytics.trending_daily": [
+   "DATE",
+   "INT64",
+   "INT64",
+   "NUMERIC",
+   "INT64",
+   "TIMESTAMP"
+  ],
+  "public.account_map": [
+   "INT64",
+   "STRING",
+   "TIMESTAMP"
+  ],
+  "public.accounts": [
+   "STRING",
+   "STRING",
+   "TIMESTAMP"
+  ],
+  "public.cart_items": [
+   "INT64",
+   "INT64",
+   "INT64",
+   "STRING",
+   "TIMESTAMP"
+  ],
+  "public.order_lines": [
+   "INT64",
+   "INT64",
+   "NUMERIC",
+   "STRING",
+   "STRING",
+   "TIMESTAMP"
+  ],
+  "public.orders": [
+   "INT64",
+   "INT64",
+   "INT64",
+   "NUMERIC",
+   "STRING",
+   "INT64",
+   "TIMESTAMP",
+   "TIMESTAMP"
+  ],
+  "public.payments": [
+   "INT64",
+   "INT64",
+   "NUMERIC",
+   "NUMERIC",
+   "NUMERIC",
+   "TIMESTAMP",
+   "STRING"
+  ],
+  "public.products": [
+   "INT64",
+   "STRING",
+   "STRING",
+   "STRING",
+   "STRING",
+   "NUMERIC",
+   "NUMERIC",
+   "INT64",
+   "TIMESTAMP"
+  ],
+  "public.report_rows": [
+   "DATE",
+   "INT64",
+   "INT64",
+   "NUMERIC",
+   "TIMESTAMP"
+  ],
+  "public.report_rows_intraday": [
+   "DATE",
+   "INT64",
+   "INT64",
+   "NUMERIC",
+   "TIMESTAMP"
+  ],
+  "public.statements": [
+   "STRING",
+   "NUMERIC",
+   "NUMERIC",
+   "NUMERIC",
+   "INT64",
+   "TIMESTAMP"
+  ],
+  "public.top_products": [
+   "INT64",
+   "INT64",
+   "INT64",
+   "DATE",
+   "TIMESTAMP"
+  ],
+  "public.users": [
+   "INT64",
+   "STRING",
+   "STRING",
+   "STRING",
+   "STRING",
+   "STRING",
+   "STRING",
+   "BOOL",
+   "TIMESTAMP"
+  ]
+ },
+ "tables": {
+  "analytics.blank_brand_products": [
+   [
+    "product_id",
+    "bigint"
+   ],
+   [
+    "title",
+    "text"
+   ],
+   [
+    "category",
+    "text"
+   ],
+   [
+    "brand",
+    "text"
+   ],
+   [
+    "vendor",
+    "text"
+   ],
+   [
+    "units",
+    "bigint"
+   ],
+   [
+    "revenue",
+    "numeric(14,2)"
+   ],
+   [
+    "first_order_at",
+    "timestamp with time zone"
+   ],
+   [
+    "last_order_at",
+    "timestamp with time zone"
+   ],
+   [
+    "suspected_cause",
+    "text"
+   ],
+   [
+    "captured_at",
+    "timestamp with time zone"
+   ]
+  ],
+  "analytics.category_name_history": [
+   [
+    "code",
+    "text"
+   ],
+   [
+    "display_group",
+    "text"
+   ],
+   [
+    "valid_from",
+    "date"
+   ]
+  ],
+  "analytics.category_names": [
+   [
+    "code",
+    "text"
+   ],
+   [
+    "display_group",
+    "text"
+   ],
+   [
+    "valid_from",
+    "date"
+   ]
+  ],
+  "analytics.chargebacks": [
+   [
+    "order_id",
+    "bigint"
+   ],
+   [
+    "amount",
+    "numeric(12,2)"
+   ],
+   [
+    "reported_at",
+    "timestamp with time zone"
+   ]
+  ],
+  "analytics.daily_funnel": [
+   [
+    "day",
+    "date"
+   ],
+   [
+    "sessions",
+    "integer"
+   ],
+   [
+    "users_active",
+    "integer"
+   ],
+   [
+    "created_at",
+    "timestamp with time zone"
+   ]
+  ],
+  "analytics.digest_log": [
+   [
+    "sent_at",
+    "timestamp with time zone"
+   ],
+   [
+    "recipients",
+    "integer"
+   ],
+   [
+    "top_product",
+    "bigint"
+   ]
+  ],
+  "analytics.kpi_daily": [
+   [
+    "day",
+    "date"
+   ],
+   [
+    "active_customers",
+    "integer"
+   ],
+   [
+    "created_at",
+    "timestamp with time zone"
+   ]
+  ],
+  "analytics.model_registry": [
+   [
+    "version",
+    "text"
+   ],
+   [
+    "trained_at",
+    "timestamp with time zone"
+   ],
+   [
+    "coef_json",
+    "text"
+   ],
+   [
+    "train_rows",
+    "integer"
+   ]
+  ],
+  "analytics.model_scores": [
+   [
+    "base_pid",
+    "bigint"
+   ],
+   [
+    "rec_pid",
+    "bigint"
+   ],
+   [
+    "score",
+    "numeric(10,4)"
+   ],
+   [
+    "updated_at",
+    "timestamp with time zone"
+   ]
+  ],
+  "analytics.order_risk": [
+   [
+    "order_id",
+    "bigint"
+   ],
+   [
+    "score",
+    "numeric(6,4)"
+   ],
+   [
+    "core",
+    "numeric(6,4)"
+   ],
+   [
+    "new_account",
+    "boolean"
+   ],
+   [
+    "high_velocity",
+    "boolean"
+   ],
+   [
+    "scored_at",
+    "timestamp with time zone"
+   ]
+  ],
+  "analytics.price_history": [
+   [
+    "product_id",
+    "bigint"
+   ],
+   [
+    "list_price",
+    "numeric(12,2)"
+   ],
+   [
+    "valid_from",
+    "timestamp with time zone"
+   ]
+  ],
+  "analytics.price_suggestions": [
+   [
+    "product_id",
+    "bigint"
+   ],
+   [
+    "current_price",
+    "numeric(12,2)"
+   ],
+   [
+    "suggested_price",
+    "numeric(12,2)"
+   ],
+   [
+    "demand_units",
+    "integer"
+   ],
+   [
+    "created_at",
+    "timestamp with time zone"
+   ]
+  ],
+  "analytics.product_affinity": [
+   [
+    "base_pid",
+    "bigint"
+   ],
+   [
+    "rec_pid",
+    "bigint"
+   ],
+   [
+    "score",
+    "numeric(10,4)"
+   ],
+   [
+    "pairs_seen",
+    "integer"
+   ],
+   [
+    "updated_at",
+    "timestamp with time zone"
+   ]
+  ],
+  "analytics.product_affinity_v2": [
+   [
+    "base_pid",
+    "bigint"
+   ],
+   [
+    "rec_pid",
+    "bigint"
+   ],
+   [
+    "score",
+    "numeric(10,4)"
+   ],
+   [
+    "pairs_seen",
+    "integer"
+   ],
+   [
+    "model_version",
+    "text"
+   ],
+   [
+    "updated_at",
+    "timestamp with time zone"
+   ]
+  ],
+  "analytics.rec_decision_log": [
+   [
+    "ts",
+    "timestamp with time zone"
+   ],
+   [
+    "user_id",
+    "bigint"
+   ],
+   [
+    "base_pid",
+    "bigint"
+   ],
+   [
+    "items",
+    "text"
+   ],
+   [
+    "intended_version",
+    "text"
+   ],
+   [
+    "effective_version",
+    "text"
+   ],
+   [
+    "rec_source",
+    "text"
+   ],
+   [
+    "fallback_reason",
+    "text"
+   ],
+   [
+    "arm",
+    "text"
+   ]
+  ],
+  "analytics.reorder_hints": [
+   [
+    "product_id",
+    "bigint"
+   ],
+   [
+    "velocity",
+    "numeric(10,4)"
+   ],
+   [
+    "hint_units",
+    "integer"
+   ],
+   [
+    "created_at",
+    "timestamp with time zone"
+   ]
+  ],
+  "analytics.statement_corrections": [
+   [
+    "month",
+    "text"
+   ],
+   [
+    "delta",
+    "numeric(12,2)"
+   ],
+   [
+    "reason",
+    "text"
+   ]
+  ],
+  "analytics.statement_overrides": [
+   [
+    "month",
+    "text"
+   ],
+   [
+    "gross",
+    "numeric(12,2)"
+   ],
+   [
+    "fee",
+    "numeric(12,2)"
+   ],
+   [
+    "net",
+    "numeric(12,2)"
+   ],
+   [
+    "orders_count",
+    "integer"
+   ],
+   [
+    "created_at",
+    "timestamp with time zone"
+   ],
+   [
+    "note",
+    "text"
+   ]
+  ],
+  "analytics.test_users": [
+   [
+    "user_id",
+    "bigint"
+   ]
+  ],
+  "analytics.trending_daily": [
+   [
+    "day",
+    "date"
+   ],
+   [
+    "rank",
+    "integer"
+   ],
+   [
+    "product_id",
+    "bigint"
+   ],
+   [
+    "score",
+    "numeric(12,4)"
+   ],
+   [
+    "units",
+    "integer"
+   ],
+   [
+    "created_at",
+    "timestamp with time zone"
+   ]
+  ],
+  "public.account_map": [
+   [
+    "uid",
+    "bigint"
+   ],
+   [
+    "account_id",
+    "uuid"
+   ],
+   [
+    "linked_at",
+    "timestamp with time zone"
+   ]
+  ],
+  "public.accounts": [
+   [
+    "account_id",
+    "uuid"
+   ],
+   [
+    "email",
+    "text"
+   ],
+   [
+    "created_at",
+    "timestamp with time zone"
+   ]
+  ],
+  "public.cart_items": [
+   [
+    "id",
+    "bigint"
+   ],
+   [
+    "user_id",
+    "bigint"
+   ],
+   [
+    "product_id",
+    "bigint"
+   ],
+   [
+    "session",
+    "text"
+   ],
+   [
+    "created_at",
+    "timestamp with time zone"
+   ]
+  ],
+  "public.order_lines": [
+   [
+    "order_id",
+    "bigint"
+   ],
+   [
+    "product_id",
+    "bigint"
+   ],
+   [
+    "price",
+    "numeric"
+   ],
+   [
+    "session",
+    "text"
+   ],
+   [
+    "payment_ref",
+    "text"
+   ],
+   [
+    "created_at",
+    "timestamp with time zone"
+   ]
+  ],
+  "public.orders": [
+   [
+    "id",
+    "bigint"
+   ],
+   [
+    "user_id",
+    "bigint"
+   ],
+   [
+    "product_id",
+    "bigint"
+   ],
+   [
+    "price",
+    "numeric(12,2)"
+   ],
+   [
+    "payment_ref",
+    "text"
+   ],
+   [
+    "status",
+    "integer"
+   ],
+   [
+    "created_at",
+    "timestamp with time zone"
+   ],
+   [
+    "updated_at",
+    "timestamp with time zone"
+   ]
+  ],
+  "public.payments": [
+   [
+    "id",
+    "bigint"
+   ],
+   [
+    "order_id",
+    "bigint"
+   ],
+   [
+    "gross",
+    "numeric(12,2)"
+   ],
+   [
+    "fee",
+    "numeric(12,2)"
+   ],
+   [
+    "net",
+    "numeric(12,2)"
+   ],
+   [
+    "created_at",
+    "timestamp with time zone"
+   ],
+   [
+    "payment_ref",
+    "text"
+   ]
+  ],
+  "public.products": [
+   [
+    "id",
+    "bigint"
+   ],
+   [
+    "title",
+    "text"
+   ],
+   [
+    "category",
+    "text"
+   ],
+   [
+    "brand",
+    "text"
+   ],
+   [
+    "vendor",
+    "text"
+   ],
+   [
+    "list_price",
+    "numeric(12,2)"
+   ],
+   [
+    "cost_price",
+    "numeric(12,2)"
+   ],
+   [
+    "stock",
+    "integer"
+   ],
+   [
+    "created_at",
+    "timestamp with time zone"
+   ]
+  ],
+  "public.report_rows": [
+   [
+    "report_date",
+    "date"
+   ],
+   [
+    "product_id",
+    "bigint"
+   ],
+   [
+    "units",
+    "integer"
+   ],
+   [
+    "revenue",
+    "numeric(14,2)"
+   ],
+   [
+    "created_at",
+    "timestamp with time zone"
+   ]
+  ],
+  "public.report_rows_intraday": [
+   [
+    "report_date",
+    "date"
+   ],
+   [
+    "product_id",
+    "bigint"
+   ],
+   [
+    "units",
+    "integer"
+   ],
+   [
+    "revenue",
+    "numeric(14,2)"
+   ],
+   [
+    "created_at",
+    "timestamp with time zone"
+   ]
+  ],
+  "public.statements": [
+   [
+    "month",
+    "text"
+   ],
+   [
+    "gross",
+    "numeric(14,2)"
+   ],
+   [
+    "fee",
+    "numeric(14,2)"
+   ],
+   [
+    "net",
+    "numeric(14,2)"
+   ],
+   [
+    "orders_count",
+    "integer"
+   ],
+   [
+    "created_at",
+    "timestamp with time zone"
+   ]
+  ],
+  "public.top_products": [
+   [
+    "rank",
+    "integer"
+   ],
+   [
+    "product_id",
+    "bigint"
+   ],
+   [
+    "units",
+    "integer"
+   ],
+   [
+    "report_date",
+    "date"
+   ],
+   [
+    "created_at",
+    "timestamp with time zone"
+   ]
+  ],
+  "public.users": [
+   [
+    "id",
+    "bigint"
+   ],
+   [
+    "email",
+    "text"
+   ],
+   [
+    "name",
+    "text"
+   ],
+   [
+    "region",
+    "text"
+   ],
+   [
+    "signup_channel",
+    "text"
+   ],
+   [
+    "device",
+    "text"
+   ],
+   [
+    "age_band",
+    "text"
+   ],
+   [
+    "marketing_opt_in",
+    "boolean"
+   ],
+   [
+    "created_at",
+    "timestamp with time zone"
+   ]
+  ]
+ }
+}
