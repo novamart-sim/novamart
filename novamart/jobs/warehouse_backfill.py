@@ -4,7 +4,7 @@ Mechanism (per table, driven by warehouse_manifest.json):
   1. `gcloud sql export csv` with an explicit column-cast SELECT (timestamps
      rendered UTC, NULLs as a sentinel so blank text stays blank)
   2. `bq load` into the matching dataset (public.* -> novamart.*,
-     analytics.* -> analytics.*) with the manifest schema
+     analytics.* -> novamart_analytics.*) with the manifest schema
 
 Requires: gcloud + bq authenticated; a staging GCS prefix the Cloud SQL
 service agent can write to. Exports are serialized (Cloud SQL runs one
@@ -57,7 +57,7 @@ def main() -> None:
               if not args.only or k in args.only}
     for i, (table, cols) in enumerate(sorted(tables.items()), 1):
         schema_name, name = table.split(".")
-        dataset = "novamart" if schema_name == "public" else schema_name
+        dataset = {"public": "novamart", "analytics": "novamart_analytics"}.get(schema_name, schema_name)
         select = ", ".join(
             "COALESCE(" + cast_expr(c, t) + ", '" + NULL + "')" if t != "text"
             else "COALESCE(" + c + ", '" + NULL + "')"
