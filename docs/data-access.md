@@ -6,7 +6,7 @@ live now:
 | Surface | Where | Notes |
 |---|---|---|
 | Serving DB (Postgres) | Cloud SQL `novamart-prod-replica`, db `novamart` | the store this codebase reads/writes; read-only roles for analytics |
-| Warehouse | BigQuery project `novamart-warehouse` | dataset `novamart` (12 app tables), `analytics` (20 tables + views) |
+| Warehouse | BigQuery project `novamart-warehouse` | dataset `novamart` (12 app tables), `novamart_analytics` (20 tables + views) |
 | Query history | BQ `novamart_logs.db_queries` | Postgres statement log export (textPayload = raw line) |
 | App logs | BQ `novamart_logs.app_events` | jsonPayload = the app's JSONL records |
 | Job runs | BQ `novamart_logs.job_runs` + Airflow on `novamart-ops` | Airflow UI has per-run task logs |
